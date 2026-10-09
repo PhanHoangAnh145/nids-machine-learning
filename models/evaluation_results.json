@@ -1,0 +1,356 @@
+{
+  "Decision Tree": {
+    "val_accuracy": 0.9976185751141099,
+    "val_f1": 0.997612712029565,
+    "test_accuracy": 0.7705819730305181,
+    "test_precision_weighted": 0.82227803639718,
+    "test_recall_weighted": 0.7705819730305181,
+    "test_f1_weighted": 0.7340600696041586,
+    "test_f1_macro": 0.5526608679260533,
+    "binary_accuracy": 0.7858410220014195,
+    "binary_precision": 0.9703842989775532,
+    "binary_recall": 0.643419309592457,
+    "binary_f1": 0.7737794021178896,
+    "train_time_sec": 0.8785011768341064,
+    "infer_time_sec": 0.0054700374603271484,
+    "confusion_matrix": [
+      [
+        6146,
+        1239,
+        75,
+        0,
+        0
+      ],
+      [
+        62,
+        9459,
+        187,
+        1,
+        2
+      ],
+      [
+        245,
+        680,
+        1496,
+        0,
+        0
+      ],
+      [
+        5,
+        2605,
+        10,
+        263,
+        2
+      ],
+      [
+        0,
+        52,
+        0,
+        7,
+        8
+      ]
+    ],
+    "classification_report": {
+      "Từ chối dịch vụ (DoS)": {
+        "precision": 0.9516878290492412,
+        "recall": 0.8238605898123325,
+        "f1-score": 0.8831728696651818,
+        "support": 7460.0
+      },
+      "Bình thường (Normal)": {
+        "precision": 0.673957962237264,
+        "recall": 0.974050046339203,
+        "f1-score": 0.7966815463657037,
+        "support": 9711.0
+      },
+      "Dò quét mạng (Probe)": {
+        "precision": 0.8461538461538461,
+        "recall": 0.6179264766625362,
+        "f1-score": 0.7142516113630938,
+        "support": 2421.0
+      },
+      "Xâm nhập từ xa (R2L)": {
+        "precision": 0.9704797047970479,
+        "recall": 0.09116117850953206,
+        "f1-score": 0.16666666666666666,
+        "support": 2885.0
+      },
+      "Leo thang đặc quyền (U2R)": {
+        "precision": 0.6666666666666666,
+        "recall": 0.11940298507462686,
+        "f1-score": 0.20253164556962025,
+        "support": 67.0
+      },
+      "accuracy": 0.7705819730305181,
+      "macro avg": {
+        "precision": 0.8217892017808133,
+        "recall": 0.5252802552796461,
+        "f1-score": 0.5526608679260533,
+        "support": 22544.0
+      },
+      "weighted avg": {
+        "precision": 0.82227803639718,
+        "recall": 0.7705819730305181,
+        "f1-score": 0.7340600696041586,
+        "support": 22544.0
+      }
+    }
+  },
+  "Random Forest": {
+    "val_accuracy": 0.998809287557055,
+    "val_f1": 0.9988118558230542,
+    "test_accuracy": 0.743346344925479,
+    "test_precision_weighted": 0.8019813586029731,
+    "test_recall_weighted": 0.743346344925479,
+    "test_f1_weighted": 0.6982537189288053,
+    "test_f1_macro": 0.5009445010688351,
+    "binary_accuracy": 0.7549680624556423,
+    "binary_precision": 0.9664326738991704,
+    "binary_recall": 0.5900412997740201,
+    "binary_f1": 0.7327269208438165,
+    "train_time_sec": 0.7719123363494873,
+    "infer_time_sec": 0.04152727127075195,
+    "confusion_matrix": [
+      [
+        5763,
+        1625,
+        72,
+        0,
+        0
+      ],
+      [
+        67,
+        9448,
+        192,
+        1,
+        3
+      ],
+      [
+        164,
+        771,
+        1486,
+        0,
+        0
+      ],
+      [
+        0,
+        2808,
+        17,
+        56,
+        4
+      ],
+      [
+        0,
+        57,
+        0,
+        5,
+        5
+      ]
+    ],
+    "classification_report": {
+      "Từ chối dịch vụ (DoS)": {
+        "precision": 0.9614614614614615,
+        "recall": 0.7725201072386059,
+        "f1-score": 0.8566968931172886,
+        "support": 7460.0
+      },
+      "Bình thường (Normal)": {
+        "precision": 0.6423278265007818,
+        "recall": 0.9729173102667078,
+        "f1-score": 0.7737919737919738,
+        "support": 9711.0
+      },
+      "Dò quét mạng (Probe)": {
+        "precision": 0.8409734012450482,
+        "recall": 0.6137959520859149,
+        "f1-score": 0.7096466093600764,
+        "support": 2421.0
+      },
+      "Xâm nhập từ xa (R2L)": {
+        "precision": 0.9032258064516129,
+        "recall": 0.019410745233968803,
+        "f1-score": 0.03800475059382423,
+        "support": 2885.0
+      },
+      "Leo thang đặc quyền (U2R)": {
+        "precision": 0.4166666666666667,
+        "recall": 0.07462686567164178,
+        "f1-score": 0.12658227848101267,
+        "support": 67.0
+      },
+      "accuracy": 0.743346344925479,
+      "macro avg": {
+        "precision": 0.7529310324651142,
+        "recall": 0.49065419609936783,
+        "f1-score": 0.5009445010688351,
+        "support": 22544.0
+      },
+      "weighted avg": {
+        "precision": 0.8019813586029731,
+        "recall": 0.743346344925479,
+        "f1-score": 0.6982537189288053,
+        "support": 22544.0
+      }
+    }
+  },
+  "K-Nearest Neighbors": {
+    "val_accuracy": 0.9959912681087517,
+    "val_f1": 0.9959472702680348,
+    "test_accuracy": 0.7660131298793471,
+    "test_precision_weighted": 0.815307247434107,
+    "test_recall_weighted": 0.7660131298793471,
+    "test_f1_weighted": 0.7205943086490888,
+    "test_f1_macro": 0.5649123935217042,
+    "binary_accuracy": 0.7825585521646558,
+    "binary_precision": 0.9681265494038485,
+    "binary_recall": 0.6390555598846723,
+    "binary_f1": 0.7699023657529103,
+    "train_time_sec": 0.011884927749633789,
+    "infer_time_sec": 1.8438794612884521,
+    "confusion_matrix": [
+      [
+        6098,
+        1275,
+        87,
+        0,
+        0
+      ],
+      [
+        57,
+        9441,
+        208,
+        2,
+        3
+      ],
+      [
+        179,
+        593,
+        1648,
+        1,
+        0
+      ],
+      [
+        2,
+        2715,
+        100,
+        66,
+        2
+      ],
+      [
+        0,
+        49,
+        0,
+        2,
+        16
+      ]
+    ],
+    "classification_report": {
+      "Từ chối dịch vụ (DoS)": {
+        "precision": 0.9624368686868687,
+        "recall": 0.817426273458445,
+        "f1-score": 0.884024354885474,
+        "support": 7460.0
+      },
+      "Bình thường (Normal)": {
+        "precision": 0.6708590918780644,
+        "recall": 0.9721964782205746,
+        "f1-score": 0.7938950554994955,
+        "support": 9711.0
+      },
+      "Dò quét mạng (Probe)": {
+        "precision": 0.8066568771414586,
+        "recall": 0.6807104502271788,
+        "f1-score": 0.7383512544802867,
+        "support": 2421.0
+      },
+      "Xâm nhập từ xa (R2L)": {
+        "precision": 0.9295774647887324,
+        "recall": 0.022876949740034663,
+        "f1-score": 0.044654939106901215,
+        "support": 2885.0
+      },
+      "Leo thang đặc quyền (U2R)": {
+        "precision": 0.7619047619047619,
+        "recall": 0.23880597014925373,
+        "f1-score": 0.36363636363636365,
+        "support": 67.0
+      },
+      "accuracy": 0.7660131298793471,
+      "macro avg": {
+        "precision": 0.8262870128799772,
+        "recall": 0.5464032243590974,
+        "f1-score": 0.5649123935217042,
+        "support": 22544.0
+      },
+      "weighted avg": {
+        "precision": 0.815307247434107,
+        "recall": 0.7660131298793471,
+        "f1-score": 0.7205943086490888,
+        "support": 22544.0
+      }
+    }
+  },
+  "top15_features": [
+    {
+      "feature": "src_bytes",
+      "importance": 0.09641093430931158
+    },
+    {
+      "feature": "dst_host_srv_count",
+      "importance": 0.0759424435502461
+    },
+    {
+      "feature": "dst_bytes",
+      "importance": 0.06143243205257926
+    },
+    {
+      "feature": "logged_in",
+      "importance": 0.03789043703437645
+    },
+    {
+      "feature": "dst_host_srv_serror_rate",
+      "importance": 0.0373408416743428
+    },
+    {
+      "feature": "dst_host_serror_rate",
+      "importance": 0.03707185530960534
+    },
+    {
+      "feature": "srv_count",
+      "importance": 0.03685184237937248
+    },
+    {
+      "feature": "dst_host_same_src_port_rate",
+      "importance": 0.036154692039093196
+    },
+    {
+      "feature": "count",
+      "importance": 0.03614563016319522
+    },
+    {
+      "feature": "dst_host_diff_srv_rate",
+      "importance": 0.0329473574620648
+    },
+    {
+      "feature": "dst_host_same_srv_rate",
+      "importance": 0.030470176465972294
+    },
+    {
+      "feature": "service_telnet",
+      "importance": 0.030299565944157905
+    },
+    {
+      "feature": "dst_host_count",
+      "importance": 0.02928122314032378
+    },
+    {
+      "feature": "service_http",
+      "importance": 0.028115618632268125
+    },
+    {
+      "feature": "service_ftp_data",
+      "importance": 0.025925864490961924
+    }
+  ],
+  "best_model": "Random Forest"
+}

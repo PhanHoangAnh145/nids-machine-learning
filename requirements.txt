@@ -1,0 +1,19 @@
+# Thư viện Mã hóa & Mật mã (Cryptography)
+pycryptodome>=3.23.0
+cryptography>=50.0.1
+
+# Thư viện Toán học số học / Lý thuyết số (RSA, Modular Arithmetic)
+sympy>=1.14.0
+
+# Thư viện Mạng & HTTP (API, Web Security)
+requests>=2.34.2
+
+# Giao diện hiện đại (Modern UI cho app đồ án ATTT)
+customtkinter>=6.0.0
+
+# Thư viện Khoa học dữ liệu & Machine Learning (NIDS)
+numpy>=2.0.0
+pandas>=2.2.0
+scikit-learn>=1.5.0
+joblib>=1.4.0
+matplotlib>=3.9.0
