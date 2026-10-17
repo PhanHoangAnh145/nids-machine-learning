@@ -35,3 +35,13 @@ wheels/
 # Environment variables
 .env
 .env.local
+
+# Encrypted logs and secret keys
+logs/
+*.key
+*.pem
+
+# NIDS encrypted logs and secret keys
+logs/
+*.key
+*.pem

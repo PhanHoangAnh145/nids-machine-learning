@@ -29,6 +29,7 @@ DATA_DIR = os.path.join(CURRENT_DIR, "data")
 sys.path.append(SRC_DIR)
 
 from predictor import NIDSPredictor
+from crypto_logger import SecureAlertLogger
 from preprocess import FEATURE_NAMES, CLASS_DISPLAY_NAMES, CLASS_LABELS
 
 # Cau hinh giao dien CustomTkinter
@@ -47,6 +48,9 @@ class NIDSApp(ctk.CTk):
         # Khoi tao bo du doan NIDS
         self.predictor = None
         self.init_predictor()
+
+        # Khoi tao module ma hoa nhat ky AES-256-GCM
+        self.crypto_logger = SecureAlertLogger()
 
         # Dữ liệu lưu trữ tạm cho quét file CSV
         self.batch_df = None
@@ -422,6 +426,27 @@ class NIDSApp(ctk.CTk):
 
         try:
             result = self.predictor.predict_single(input_data)
+            
+            # Ma hoa nhat ky khi AI phat hien tan cong
+            if result["is_attack"]:
+                try:
+                    self.crypto_logger.append_alert({
+                        "event": "single_scan",
+                        "category": result["category"],
+                        "confidence": float(result["confidence"]),
+                        "protocol": str(input_data.get("protocol_type", "")),
+                        "service": str(input_data.get("service", "")),
+                        "flag": str(input_data.get("flag", ""))
+                    })
+
+                    print("[CRYPTO] Da ma hoa va luu canh bao!")
+
+                except Exception as crypto_error:
+                    messagebox.showwarning(
+                        "Loi ma hoa",
+                        f"Khong the luu nhat ky: {crypto_error}"
+                    )
+
 
             # Cập nhật Card Trạng thái
             if result['is_attack']:
@@ -632,10 +657,45 @@ class NIDSApp(ctk.CTk):
             df = pd.read_csv(file_path)
             self.batch_progress.set(0.3)
 
-            # Dự đoán
+            
+            # Du doan bang AI
             result_df = self.predictor.predict_batch(df)
             self.batch_result_df = result_df
+
+            # Tong hop ket qua de ma hoa
+            attack_rows = result_df[
+                result_df["is_attack"].astype(bool)
+            ]
+
+            try:
+                self.crypto_logger.append_alert({
+                    "event": "batch_scan",
+                    "file_name": os.path.basename(file_path),
+                    "total_records": int(len(result_df)),
+                    "attack_records": int(len(attack_rows)),
+                    "categories": {
+                        str(k): int(v)
+                        for k, v in attack_rows[
+                            "predicted_category"
+                        ].value_counts().items()
+                    }
+                })
+
+                print("[CRYPTO] Da ma hoa bao cao quet CSV!")
+
+            except Exception as crypto_error:
+                error_message = str(crypto_error)
+
+                self.after(
+                    0,
+                    lambda msg=error_message: messagebox.showwarning(
+                        "Loi ma hoa",
+                        f"Quet thanh cong nhung khong luu duoc log: {msg}"
+                    )
+                )
+
             self.batch_progress.set(0.8)
+
 
             # Đưa dữ liệu lên Treeview trên main thread
             self.after(0, lambda: self.update_batch_ui(result_df))
