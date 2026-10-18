@@ -51,6 +51,46 @@ Tải bộ dữ liệu từ trang chính thức của UNSW Canberra rồi đặt
 
 Mọi lệnh chạy từ thư mục `nids-machine-learning/`.
 
+### Đánh giá tổng hợp cũ + mới trong một lần (khuyến nghị)
+
+Mở `cross_dataset/evaluate_all.py` trong IDE rồi bấm Run, hoặc chạy:
+
+```bash
+python -m cross_dataset.evaluate_all                  # Val 20% + KDDTest+ + UNSW-NB15 (nếu có file)
+python -m cross_dataset.evaluate_all --download-unsw  # tự tải UNSW_NB15_testing-set.csv (~15 MB) nếu chưa có
+```
+
+Script chạy lần lượt 3 tập:
+1. **NSL-KDD Validation 20%**: tách lại giống hệt `src/train.py`.
+2. **NSL-KDD KDDTest+**.
+3. **UNSW-NB15**: tự tìm file trong `data/external/unsw_nb15/`.
+
+Sau đó script in bảng so sánh và đối chiếu với `evaluation_results.json`. Kết quả lưu trong `reports/cross_dataset/full_eval_<thời gian>/` gồm `summary.csv`, `comparison.png` và chi tiết từng tập.
+
+### Train model mới trên dữ liệu trộn NSL-KDD + UNSW-NB15
+
+Model cũ chỉ học NSL-KDD nên gần như không nhận ra tấn công UNSW-NB15 (Recall khoảng 0,1%). Mở `cross_dataset/train_mixed.py` trong IDE rồi bấm Run, hoặc chạy:
+
+```bash
+python -m cross_dataset.train_mixed
+```
+
+- **Dữ liệu train:** 80% KDDTrain+ (tách đúng như `src/train.py`) cộng 80% UNSW-NB15.
+- **Model:** Random Forest, cùng siêu tham số với `src/train.py`.
+- **Nơi lưu:** model mới nằm ở `models/mixed/`, **không ghi đè** `models/best_model.joblib`. `main.py` vẫn dùng model cũ.
+- **Đánh giá:** cả model cũ lẫn model mới được chạy trên cùng 3 tập không dùng để train (NSL Val 20%, KDDTest+, UNSW 20% giữ lại). Kết quả lưu ở `reports/cross_dataset/mixed_train_<thời gian>/`.
+
+Muốn đánh giá model mới trên dữ liệu khác:
+
+```bash
+python -m cross_dataset.run_inference --dataset unsw-nb15 --input <file> \
+    --model models/mixed/best_model.joblib --preprocessor models/mixed/preprocessor.joblib
+```
+
+Lưu ý: tập UNSW 20% giữ lại được tách từ cùng một file với phần train, nên nó cùng phân phối với dữ liệu train. Để đánh giá khắt khe hơn, hãy train trên `UNSW_NB15_training-set.csv` và kiểm thử trên `UNSW_NB15_testing-set.csv`.
+
+### Chạy riêng từng tập
+
 ```bash
 # 0) Đối chứng: chạy lại KDDTest+ qua pipeline mới, kết quả phải KHỚP evaluation_results.json
 python -m cross_dataset.run_inference --dataset nsl-kdd --input data/raw/KDDTest+.txt --compare-baseline
