@@ -1,0 +1,109 @@
+{
+  "trained_at": "2026-10-18T21:10:46",
+  "train_samples": {
+    "nsl_kdd": 100778,
+    "unsw_nb15": 65865
+  },
+  "unsw_files": [
+    "UNSW_NB15_testing-set.csv"
+  ],
+  "random_state": 42,
+  "train_time_sec": 4.2,
+  "params": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "class_weight": "balanced",
+    "criterion": "gini",
+    "max_depth": 20,
+    "max_features": "sqrt",
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 100,
+    "n_jobs": -1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "results_old_model": [
+    {
+      "Tap du lieu": "NSL-KDD Val 20% (da biet)",
+      "So mau": 25195,
+      "Acc 5 lop": 0.998809287557055,
+      "F1 5 lop (w)": 0.9988118558230542,
+      "Acc nhi phan": 0.998809287557055,
+      "Precision": 0.998805868304333,
+      "Recall (DR)": 0.9986355108306327,
+      "F1 nhi phan": 0.9987206823027719,
+      "FPR": 0.0010394238622020936,
+      "ROC-AUC": 0.9999897206169424
+    },
+    {
+      "Tap du lieu": "NSL-KDD KDDTest+ (moi la)",
+      "So mau": 22544,
+      "Acc 5 lop": 0.743346344925479,
+      "F1 5 lop (w)": 0.6982537189288053,
+      "Acc nhi phan": 0.7549680624556423,
+      "Precision": 0.9664326738991704,
+      "Recall (DR)": 0.5900412997740201,
+      "F1 nhi phan": 0.7327269208438165,
+      "FPR": 0.027082689733292142,
+      "ROC-AUC": 0.9681486938549162
+    },
+    {
+      "Tap du lieu": "UNSW-NB15 20% giu lai",
+      "So mau": 16467,
+      "Acc 5 lop": 0.42806825772757634,
+      "F1 5 lop (w)": 0.2694657910921751,
+      "Acc nhi phan": 0.42837189530576303,
+      "Precision": 0.014044943820224719,
+      "Recall (DR)": 0.0005514503143266791,
+      "F1 nhi phan": 0.0010612331529236973,
+      "FPR": 0.047432432432432434,
+      "ROC-AUC": 0.41098839271608656
+    }
+  ],
+  "results_new_model": [
+    {
+      "Tap du lieu": "NSL-KDD Val 20% (da biet)",
+      "So mau": 25195,
+      "Acc 5 lop": 0.9984123834094066,
+      "F1 5 lop (w)": 0.9984175965850468,
+      "Acc nhi phan": 0.9984520738241714,
+      "Precision": 0.9982095660329099,
+      "Recall (DR)": 0.9984649496844619,
+      "F1 nhi phan": 0.998337241526327,
+      "FPR": 0.0015591357933031405,
+      "ROC-AUC": 0.9999821290060484
+    },
+    {
+      "Tap du lieu": "NSL-KDD KDDTest+ (moi la)",
+      "So mau": 22544,
+      "Acc 5 lop": 0.7468949609652236,
+      "F1 5 lop (w)": 0.7072871623966619,
+      "Acc nhi phan": 0.7580731014904187,
+      "Precision": 0.966729917773561,
+      "Recall (DR)": 0.5954959869087508,
+      "F1 nhi phan": 0.7370045327418266,
+      "FPR": 0.027082689733292142,
+      "ROC-AUC": 0.9647974238553497
+    },
+    {
+      "Tap du lieu": "UNSW-NB15 20% giu lai",
+      "So mau": 16467,
+      "Acc 5 lop": 0.8039715795226817,
+      "F1 5 lop (w)": 0.8216797310960721,
+      "Acc nhi phan": 0.9078156312625251,
+      "Precision": 0.9029571901355824,
+      "Recall (DR)": 0.9328333517150105,
+      "F1 nhi phan": 0.9176521644786807,
+      "FPR": 0.12283783783783783,
+      "ROC-AUC": 0.978985443202108
+    }
+  ]
+}
