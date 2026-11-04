@@ -6,6 +6,7 @@ Sinh vien thuc hien: Phan Hoang Anh
 import os
 import sys
 import threading
+import time
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import customtkinter as ctk
@@ -31,6 +32,17 @@ sys.path.append(SRC_DIR)
 from predictor import NIDSPredictor
 from crypto_logger import SecureAlertLogger
 from preprocess import FEATURE_NAMES, CLASS_DISPLAY_NAMES, CLASS_LABELS
+
+# Module giám sát thời gian thực (độc lập, đặt ở thư mục realtime/). Nhập có bảo
+# vệ: nếu thiếu, ứng dụng vẫn chạy bình thường, chỉ tab Realtime báo hướng dẫn.
+try:
+    from realtime.engine import RealtimeEngine
+    from realtime.config import RealtimeConfig
+    REALTIME_OK = True
+    REALTIME_ERR = ""
+except Exception as _e:  # noqa: BLE001
+    REALTIME_OK = False
+    REALTIME_ERR = str(_e)
 
 # Cau hinh giao dien CustomTkinter
 ctk.set_appearance_mode("Dark")
@@ -81,7 +93,7 @@ class NIDSApp(ctk.CTk):
     def create_sidebar(self):
         self.sidebar_frame = ctk.CTkFrame(self, width=230, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(6, weight=1)
+        self.sidebar_frame.grid_rowconfigure(7, weight=1)
 
         # Logo / Tiêu đề ứng dụng
         self.logo_label = ctk.CTkLabel(
@@ -140,15 +152,26 @@ class NIDSApp(ctk.CTk):
         )
         self.btn_about.grid(row=5, column=0, padx=15, pady=8, sticky="ew")
 
+        # Nút tab GIÁM SÁT THỜI GIAN THỰC (bổ sung)
+        self.btn_realtime = ctk.CTkButton(
+            self.sidebar_frame,
+            text="📡  Giám Sát Realtime",
+            height=40,
+            anchor="w",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            command=lambda: self.select_tab("realtime")
+        )
+        self.btn_realtime.grid(row=6, column=0, padx=15, pady=8, sticky="ew")
+
         # Cài đặt giao diện Dark/Light ở chân sidebar
         self.theme_label = ctk.CTkLabel(self.sidebar_frame, text="Chế độ hiển thị:", anchor="w")
-        self.theme_label.grid(row=7, column=0, padx=20, pady=(10, 0), sticky="w")
+        self.theme_label.grid(row=8, column=0, padx=20, pady=(10, 0), sticky="w")
         self.theme_menu = ctk.CTkOptionMenu(
             self.sidebar_frame,
             values=["Dark", "Light", "System"],
             command=ctk.set_appearance_mode
         )
-        self.theme_menu.grid(row=8, column=0, padx=20, pady=(5, 20), sticky="ew")
+        self.theme_menu.grid(row=9, column=0, padx=20, pady=(5, 20), sticky="ew")
 
     # =========================================================================
     # QUẢN LÝ CHUYỂN TAB
@@ -170,6 +193,10 @@ class NIDSApp(ctk.CTk):
         self.frame_about = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.setup_about_frame()
 
+        # 5. Frame Giám sát thời gian thực (bổ sung)
+        self.frame_realtime = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.setup_realtime_frame()
+
     def select_tab(self, tab_name):
         # Reset màu nút sidebar
         default_fg = ["#3B8ED0", "#1F6AA5"]
@@ -179,12 +206,14 @@ class NIDSApp(ctk.CTk):
         self.btn_batch.configure(fg_color=default_fg if tab_name == "batch" else inactive_fg)
         self.btn_charts.configure(fg_color=default_fg if tab_name == "charts" else inactive_fg)
         self.btn_about.configure(fg_color=default_fg if tab_name == "about" else inactive_fg)
+        self.btn_realtime.configure(fg_color=default_fg if tab_name == "realtime" else inactive_fg)
 
         # Ẩn tất cả frame
         self.frame_single.grid_forget()
         self.frame_batch.grid_forget()
         self.frame_charts.grid_forget()
         self.frame_about.grid_forget()
+        self.frame_realtime.grid_forget()
 
         # Hiển thị frame được chọn
         if tab_name == "single":
@@ -195,6 +224,8 @@ class NIDSApp(ctk.CTk):
             self.frame_charts.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
         elif tab_name == "about":
             self.frame_about.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
+        elif tab_name == "realtime":
+            self.frame_realtime.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
 
     # =========================================================================
     # TAB 1: QUÉT GÓI TIN ĐƠN LẺ (SINGLE SCANNER)
@@ -620,6 +651,314 @@ class NIDSApp(ctk.CTk):
         lbl_val = ctk.CTkLabel(card, text=initial_val, font=ctk.CTkFont(size=18, weight="bold"), text_color=color)
         lbl_val.pack(pady=(0, 8))
         return lbl_val
+
+    # =========================================================================
+    # TAB 5: GIÁM SÁT THỜI GIAN THỰC (REALTIME) — bổ sung, dùng module realtime/
+    # =========================================================================
+    def setup_realtime_frame(self):
+        self.rt_engine = None
+        self.rt_thread = None
+        self.rt_stop = threading.Event()
+        self.rt_iface_map = {}
+        self.rt_counts = {"pkt": 0, "conn": 0, "attack": 0}
+
+        self.frame_realtime.grid_columnconfigure(0, weight=1)
+        self.frame_realtime.grid_rowconfigure(3, weight=1)
+
+        ctk.CTkLabel(
+            self.frame_realtime,
+            text="📡 Giám Sát & Bắt Gói Tin Thời Gian Thực",
+            font=ctk.CTkFont(size=20, weight="bold")
+        ).grid(row=0, column=0, sticky="w", pady=(0, 15))
+
+        # Nếu thiếu module realtime -> hiện hướng dẫn, dừng tại đây
+        if not REALTIME_OK:
+            ctk.CTkLabel(
+                self.frame_realtime,
+                text=("Chưa dùng được module realtime.\n\n"
+                      f"Chi tiết: {REALTIME_ERR}\n\n"
+                      "Hãy chắc chắn thư mục 'realtime/' nằm cùng cấp với main.py "
+                      "và đã cài: pip install scapy scikit-learn pandas joblib"),
+                justify="left", text_color="#e0a030"
+            ).grid(row=1, column=0, sticky="w", padx=10)
+            return
+
+        # Thanh điều khiển
+        bar = ctk.CTkFrame(self.frame_realtime)
+        bar.grid(row=1, column=0, sticky="ew", pady=(0, 15))
+        bar.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(bar, text="Card mạng:").grid(row=0, column=0, padx=(15, 6), pady=12)
+        self.rt_iface_menu = ctk.CTkOptionMenu(bar, values=["(bấm 🔄 để nạp)"], width=360)
+        self.rt_iface_menu.grid(row=0, column=1, padx=6, pady=12, sticky="w")
+        ctk.CTkButton(bar, text="🔄", width=36, command=self._rt_refresh_ifaces).grid(row=0, column=2, padx=6)
+
+        self.btn_rt_start = ctk.CTkButton(
+            bar, text="▶ Bắt gói trực tiếp", fg_color="#2ca02c", hover_color="#227d22",
+            command=self.start_realtime_capture)
+        self.btn_rt_start.grid(row=0, column=3, padx=6, pady=12)
+        self.btn_rt_stop = ctk.CTkButton(
+            bar, text="⏹ Dừng", fg_color="#a33", hover_color="#822", command=self.stop_realtime_capture)
+        self.btn_rt_stop.grid(row=0, column=4, padx=6, pady=12)
+        ctk.CTkButton(
+            bar, text="📂 Phát lại pcap", fg_color="#2b5b84", hover_color="#1e4160",
+            command=self.replay_pcap_file).grid(row=0, column=5, padx=(6, 15), pady=12)
+
+        # Hàng 2: nhận gói GỬI THẲNG từ Phần 2 qua localhost (không cần Npcap/quyền)
+        ctk.CTkLabel(bar, text="Nhận từ Phần 2:").grid(row=1, column=0, padx=(15, 6), pady=(0, 12))
+        self.btn_rt_listen = ctk.CTkButton(
+            bar, text="🛰 Nghe từ Phần 2", fg_color="#6a3", hover_color="#582",
+            command=self.toggle_listen)
+        self.btn_rt_listen.grid(row=1, column=1, padx=6, pady=(0, 12), sticky="w")
+        self.rt_listen_lbl = ctk.CTkLabel(bar, text="(đang tắt)", text_color="gray")
+        self.rt_listen_lbl.grid(row=1, column=2, columnspan=3, padx=6, pady=(0, 12), sticky="w")
+
+        # Thẻ thống kê
+        stat = ctk.CTkFrame(self.frame_realtime)
+        stat.grid(row=2, column=0, sticky="ew", pady=(0, 15))
+        stat.grid_columnconfigure((0, 1, 2, 3), weight=1)
+        self.rt_card_pkt = self.create_mini_stat_card(stat, 0, "Gói Tin Bắt Được", "0", "gray")
+        self.rt_card_conn = self.create_mini_stat_card(stat, 1, "Kết Nối", "0", "#1f77b4")
+        self.rt_card_atk = self.create_mini_stat_card(stat, 2, "Bị Tấn Công", "0", "#d62728")
+        self.rt_card_rate = self.create_mini_stat_card(stat, 3, "Tỷ Lệ Tấn Công", "0.0%", "#ff7f0e")
+
+        # Bảng kết nối phát hiện được
+        tbl = ctk.CTkFrame(self.frame_realtime)
+        tbl.grid(row=3, column=0, sticky="nsew")
+        tbl.grid_rowconfigure(0, weight=1)
+        tbl.grid_columnconfigure(0, weight=1)
+
+        cols = ("time", "src", "dst", "service", "flag", "prediction", "confidence", "status")
+        self.rt_tree = ttk.Treeview(tbl, columns=cols, show="headings", selectmode="browse")
+        for c, t, w, a in [
+            ("time", "Thời gian", 90, "center"), ("src", "Nguồn", 150, "w"),
+            ("dst", "Đích", 150, "w"), ("service", "Dịch vụ", 90, "center"),
+            ("flag", "Cờ", 70, "center"), ("prediction", "Dự đoán", 150, "w"),
+            ("confidence", "Tin cậy", 80, "center"), ("status", "Cảnh báo", 150, "center"),
+        ]:
+            self.rt_tree.heading(c, text=t)
+            self.rt_tree.column(c, width=w, anchor=a)
+        scroll = ttk.Scrollbar(tbl, orient="vertical", command=self.rt_tree.yview)
+        self.rt_tree.configure(yscrollcommand=scroll.set)
+        self.rt_tree.grid(row=0, column=0, sticky="nsew")
+        scroll.grid(row=0, column=1, sticky="ns")
+        self.rt_tree.tag_configure("attack", background="#ffcccc", foreground="#990000")
+        self.rt_tree.tag_configure("normal", background="#e6ffe6", foreground="#006600")
+
+        self.rt_status = ctk.CTkLabel(self.frame_realtime, text="Sẵn sàng.", anchor="w", text_color="gray")
+        self.rt_status.grid(row=4, column=0, sticky="ew", pady=(8, 0))
+
+        self._rt_refresh_ifaces()
+
+    # ---- liệt kê card mạng (tên dễ đọc + IP) -------------------------------
+    def _rt_refresh_ifaces(self):
+        labels, mapping = [], {}
+        try:
+            from scapy.arch.windows import get_windows_if_list
+            rows = []
+            for d in get_windows_if_list():
+                desc = d.get("description") or d.get("name") or "?"
+                ips = [ip for ip in (d.get("ips") or []) if ":" not in ip]
+                lbl = f"{desc}  [{ips[0] if ips else 'không IP'}]"
+                mapping[lbl] = d.get("name") or d.get("guid")
+                rows.append((lbl, bool(ips)))
+            rows.sort(key=lambda x: (not x[1]))
+            labels = [r[0] for r in rows]
+        except Exception:  # noqa: BLE001
+            try:
+                from scapy.arch import get_if_list
+                labels = list(get_if_list())
+                mapping = {x: x for x in labels}
+            except Exception:  # noqa: BLE001
+                labels = ["(cần cài scapy)"]
+        self.rt_iface_map = mapping
+        self.rt_iface_menu.configure(values=labels or ["(không thấy card)"])
+        if labels:
+            self.rt_iface_menu.set(labels[0])
+
+    def _rt_new_engine(self):
+        """Tạo engine mới (reset bộ đếm) nhưng DÙNG LẠI model đã nạp sẵn."""
+        self.rt_engine = RealtimeEngine(
+            config=RealtimeConfig(flow_timeout=2.0),
+            predictor=self.predictor,
+            load_model=self.predictor is None,
+        )
+        self.rt_counts = {"pkt": 0, "conn": 0, "attack": 0}
+        self.rt_tree.delete(*self.rt_tree.get_children())
+        self._rt_update_cards()
+
+    def _rt_update_cards(self):
+        c = self.rt_counts
+        self.rt_card_pkt.configure(text=str(c["pkt"]))
+        self.rt_card_conn.configure(text=str(c["conn"]))
+        self.rt_card_atk.configure(text=str(c["attack"]))
+        rate = (c["attack"] / c["conn"] * 100) if c["conn"] else 0.0
+        self.rt_card_rate.configure(text=f"{rate:.1f}%")
+
+    def _rt_on_pred(self, pred):
+        self.after(0, lambda: self._rt_add_row(pred))
+
+    def _rt_add_row(self, pred):
+        conn = pred.conn
+        self.rt_counts["conn"] += 1
+        self.rt_counts["attack"] += int(pred.is_attack)
+        if self.rt_engine:
+            self.rt_counts["pkt"] = self.rt_engine.stats.get("packets", self.rt_counts["pkt"])
+        tag = "attack" if pred.is_attack else "normal"
+        status = f"🚨 {pred.category.upper()}" if pred.is_attack else "✅ AN TOÀN"
+        self.rt_tree.insert(
+            "", "end", tags=(tag,),
+            values=(time.strftime("%H:%M:%S"), f"{conn.src}:{conn.sport}",
+                    f"{conn.dst}:{conn.dport}", conn.service, conn.flag,
+                    CLASS_DISPLAY_NAMES.get(pred.category, pred.category),
+                    f"{pred.confidence*100:.0f}%", status))
+        self.rt_tree.see(self.rt_tree.get_children()[-1])
+        self._rt_update_cards()
+
+    def start_realtime_capture(self):
+        if self.rt_thread and self.rt_thread.is_alive():
+            self.rt_status.configure(text="Đang chạy; bấm Dừng trước.")
+            return
+        label = self.rt_iface_menu.get()
+        iface = self.rt_iface_map.get(label, label)
+        if not iface or iface.startswith("("):
+            self.rt_status.configure(text="Chưa chọn được card mạng (bấm 🔄).")
+            return
+        self._rt_new_engine()
+        self.rt_stop.clear()
+        self.rt_status.configure(text=f"Đang bắt gói trên: {label} ...")
+
+        def worker():
+            try:
+                self.rt_engine.live_capture(
+                    iface=iface, on_prediction=self._rt_on_pred, stop_event=self.rt_stop)
+            except Exception as exc:  # noqa: BLE001
+                self.after(0, lambda: self.rt_status.configure(
+                    text=f"Lỗi bắt gói: {exc} (cần Npcap + quyền Administrator)"))
+            finally:
+                self.after(0, lambda: self.btn_rt_start.configure(state="normal"))
+
+        self.btn_rt_start.configure(state="disabled")
+        self.rt_thread = threading.Thread(target=worker, daemon=True)
+        self.rt_thread.start()
+
+    def stop_realtime_capture(self):
+        self.rt_stop.set()
+        self.rt_status.configure(text="Đã dừng bắt gói.")
+
+    # ---- NHẬN GÓI GỬI THẲNG TỪ PHẦN 2 (localhost HOẶC qua LAN 2 máy) ---------
+    LISTEN_HOST = "0.0.0.0"   # nghe trên MỌI card -> nhận được cả localhost lẫn máy khác trong LAN
+    LISTEN_PORT = 59999
+
+    @staticmethod
+    def _lan_ip():
+        """IP LAN của máy này (để máy Phần 2 khác biết trỏ tới đâu)."""
+        import socket
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception:  # noqa: BLE001
+            return "127.0.0.1"
+
+    def toggle_listen(self):
+        """Bật/tắt chế độ lắng nghe gói tin do Phần 2 gửi qua localhost."""
+        if getattr(self, "rt_listening", False):
+            self.rt_listen_stop.set()
+            self.rt_listening = False
+            self.btn_rt_listen.configure(text="🛰 Nghe từ Phần 2")
+            self.rt_listen_lbl.configure(text="(đang tắt)", text_color="gray")
+            return
+        # bật
+        self._rt_new_engine()
+        self.rt_listen_stop = threading.Event()
+        self.rt_listening = True
+        self.btn_rt_listen.configure(text="⏹ Dừng nghe")
+        self.rt_listen_lbl.configure(
+            text=(f"Đang nghe cổng {self.LISTEN_PORT} — cùng máy: 127.0.0.1 | "
+                  f"máy khác trỏ tới: {self._lan_ip()}:{self.LISTEN_PORT}"),
+            text_color="#2ca02c")
+        threading.Thread(target=self._listen_server, daemon=True).start()
+
+    def _listen_server(self):
+        import socket
+        try:
+            srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            srv.bind((self.LISTEN_HOST, self.LISTEN_PORT))
+            srv.listen(1)
+            srv.settimeout(1.0)
+        except Exception as exc:  # noqa: BLE001
+            self.after(0, lambda: self.rt_listen_lbl.configure(
+                text=f"Lỗi mở cổng: {exc}", text_color="#d62728"))
+            self.rt_listening = False
+            return
+        while not self.rt_listen_stop.is_set():
+            try:
+                conn, _ = srv.accept()
+            except socket.timeout:
+                continue
+            except OSError:
+                break
+            self._handle_part2_client(conn)
+        srv.close()
+
+    def _handle_part2_client(self, conn):
+        import json
+        from realtime.packet import PacketMeta
+        self.after(0, lambda: self.rt_listen_lbl.configure(
+            text="Phần 2 đang gửi...", text_color="#2ca02c"))
+        try:
+            f = conn.makefile("r", encoding="utf-8")
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    d = json.loads(line)
+                except ValueError:
+                    continue
+                meta = PacketMeta(
+                    ts=d.get("ts") or time.time(), proto=d.get("proto", "other"),
+                    src_ip=d.get("src", "0.0.0.0"), dst_ip=d.get("dst", "0.0.0.0"),
+                    sport=int(d.get("sport", 0)), dport=int(d.get("dport", 0)),
+                    length=int(d.get("length", 0)),
+                    tcp_flags=frozenset(d.get("flags", [])),
+                    icmp_type=int(d.get("icmp_type", 8)))
+                for pred in self.rt_engine.ingest_packet(meta):
+                    self._rt_on_pred(pred)
+            for pred in self.rt_engine.flush():
+                self._rt_on_pred(pred)
+        finally:
+            conn.close()
+        self.after(0, lambda: self.rt_listen_lbl.configure(
+            text=f"Đã nhận xong 1 đợt. Vẫn đang nghe cổng {self.LISTEN_PORT}...",
+            text_color="#2ca02c"))
+
+    def replay_pcap_file(self):
+        path = filedialog.askopenfilename(
+            title="Chọn file pcap để phát lại",
+            filetypes=[("PCAP", "*.pcap *.pcapng"), ("All", "*.*")])
+        if not path:
+            return
+        if self.rt_thread and self.rt_thread.is_alive():
+            self.rt_status.configure(text="Đang chạy; bấm Dừng trước.")
+            return
+        self._rt_new_engine()
+        self.rt_status.configure(text=f"Đang phát lại: {os.path.basename(path)} ...")
+
+        def worker():
+            try:
+                self.rt_engine.replay_pcap(path, on_prediction=self._rt_on_pred)
+                self.after(0, lambda: self.rt_status.configure(
+                    text=f"Xong: {os.path.basename(path)}"))
+            except Exception as exc:  # noqa: BLE001
+                self.after(0, lambda: self.rt_status.configure(text=f"Lỗi phát lại: {exc}"))
+
+        self.rt_thread = threading.Thread(target=worker, daemon=True)
+        self.rt_thread.start()
 
     def browse_csv_file(self):
         file_path = filedialog.askopenfilename(

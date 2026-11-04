@@ -1,0 +1,19 @@
+NIDS SHIELD — Module giám sát thời gian thực (realtime) + sinh lưu lượng
+=======================================================================
+Chép 2 thư mục  realtime/  và  traffic_generator/  vào thư mục gốc của dự án
+(ngang hàng với src/, cross_dataset/, models/):
+    D:\LDPlayer\nids-machine-learning\realtime
+    D:\LDPlayer\nids-machine-learning\traffic_generator
+
+Chạy thử NGAY trên 1 máy (không cần Scapy, không cần quyền):
+    cd D:\LDPlayer\nids-machine-learning
+    python -m traffic_generator --scenario all --outdir pcaps
+    python -m realtime --replay pcaps\synflood.pcap
+    python -m realtime.monitor_app        (giao diện đồ hoạ)
+
+Kiểm thử:
+    python -m unittest discover -s realtime/tests -t .
+    python -m unittest discover -s traffic_generator/tests -t .
+
+Demo 2 máy: xem realtime/README.md và traffic_generator/README.md
+Thư mục demo_pcaps/ chứa sẵn các file .pcap để phát lại thử.

@@ -1,5 +1,5 @@
 {
-  "trained_at": "2026-10-18T21:10:46",
+  "trained_at": "2026-10-28T14:12:03",
   "train_samples": {
     "nsl_kdd": 100778,
     "unsw_nb15": 65865
@@ -8,7 +8,7 @@
     "UNSW_NB15_testing-set.csv"
   ],
   "random_state": 42,
-  "train_time_sec": 4.2,
+  "train_time_sec": 5.2,
   "params": {
     "bootstrap": true,
     "ccp_alpha": 0.0,
@@ -65,7 +65,7 @@
       "Recall (DR)": 0.0005514503143266791,
       "F1 nhi phan": 0.0010612331529236973,
       "FPR": 0.047432432432432434,
-      "ROC-AUC": 0.41098839271608656
+      "ROC-AUC": 0.4109879828543665
     }
   ],
   "results_new_model": [
@@ -91,7 +91,7 @@
       "Recall (DR)": 0.5954959869087508,
       "F1 nhi phan": 0.7370045327418266,
       "FPR": 0.027082689733292142,
-      "ROC-AUC": 0.9647974238553497
+      "ROC-AUC": 0.9647974238553496
     },
     {
       "Tap du lieu": "UNSW-NB15 20% giu lai",

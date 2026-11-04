@@ -1,0 +1,3 @@
+# Phụ thuộc cho module realtime (bắt gói trực tiếp).
+# Phát lại .pcap KHÔNG cần các gói này.
+scapy>=2.5.0
