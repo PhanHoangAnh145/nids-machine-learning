@@ -1,0 +1,166 @@
+======================================================================
+  CAI DAT & KIEM TRA MOI TRUONG - NIDS
+======================================================================
+Python     : 3.15.0
+Executable : C:\Users\HP\.python-portable\python3.15.0\python\python.exe
+Thu muc    : D:\LDPlayer\nids-machine-learning
+
+$ C:\Users\HP\.python-portable\python3.15.0\python\python.exe -m pip install --disable-pip-version-check -r requirements.txt
+       ---------------------------------------- 8.4/8.4 MB 1.0 MB/s  0:00:08
+    Downloading joblib-1.6.0-py3-none-any.whl (306 kB)
+    Downloading matplotlib-3.11.2-cp315-cp315-win_amd64.whl (9.5 MB)
+       ---------------------------------------- 9.5/9.5 MB 332.4 kB/s  0:00:28
+    Downloading pillow-12.3.0-cp315-cp315-win_amd64.whl (7.2 MB)
+       ---------------------------------------- 7.2/7.2 MB 1.5 MB/s  0:00:04
+    Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+    Downloading cffi-2.1.1-cp315-cp315-win_amd64.whl (187 kB)
+    Downloading cloudpickle-3.1.2-py3-none-any.whl (22 kB)
+    Downloading contourpy-1.4.0-cp315-cp315-win_amd64.whl (240 kB)
+    Using cached cycler-0.12.1-py3-none-any.whl (8.3 kB)
+    Downloading fonttools-4.66.1-cp315-cp315-win_amd64.whl (2.5 MB)
+       ---------------------------------------- 2.5/2.5 MB 1.5 MB/s  0:00:01
+    Downloading kiwisolver-1.5.1-cp315-cp315-win_amd64.whl (72 kB)
+    Downloading narwhals-2.27.1-py3-none-any.whl (483 kB)
+    Downloading packaging-26.3-py3-none-any.whl (129 kB)
+    Downloading pyparsing-3.3.3-py3-none-any.whl (126 kB)
+    Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+    Downloading scipy-1.18.1-cp315-cp315-win_amd64.whl (37.4 MB)
+       ---------------------------------------- 37.4/37.4 MB 366.0 kB/s  0:01:12
+    Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+    Downloading threadpoolctl-3.7.0-py3-none-any.whl (26 kB)
+    Downloading darkdetect-0.8.0-py3-none-any.whl (9.0 kB)
+    Downloading pycparser-3.11-py3-none-any.whl (51 kB)
+    Downloading tzdata-2026.5-py2.py3-none-any.whl (347 kB)
+    Installing collected packages: mpmath, urllib3, tzdata, threadpoolctl, sympy, six, pyparsing, pycryptodome, pycparser, pillow, packaging, numpy, narwhals, kiwisolver, idna, fonttools, darkdetect, cycler, cloudpickle, charset_normalizer, certifi, scipy, requests, python-dateutil, joblib, customtkinter, contourpy, cffi, scikit-learn, pandas, matplotlib, cryptography
+    
+    Successfully installed certifi-2026.7.22 cffi-2.1.1 charset_normalizer-3.5.2 cloudpickle-3.1.2 contourpy-1.4.0 cryptography-50.0.2 customtkinter-6.0.0 cycler-0.12.1 darkdetect-0.8.0 fonttools-4.66.1 idna-3.20 joblib-1.6.0 kiwisolver-1.5.1 matplotlib-3.11.2 mpmath-1.3.0 narwhals-2.27.1 numpy-2.5.4 packaging-26.3 pandas-3.0.6 pillow-12.3.0 pycparser-3.11 pycryptodome-3.24.1 pyparsing-3.3.3 python-dateutil-2.9.0.post0 requests-2.34.2 scikit-learn-1.9.1 scipy-1.18.1 six-1.17.0 sympy-1.14.0 threadpoolctl-3.7.0 tzdata-2026.5 urllib3-2.8.0
+      WARNING: The script isympy.exe is installed in 'C:\Users\HP\.python-portable\python3.15.0\python\Scripts' which is not on PATH.
+      Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+      WARNING: The scripts f2py.exe and numpy-config.exe are installed in 'C:\Users\HP\.python-portable\python3.15.0\python\Scripts' which is not on PATH.
+      Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+      WARNING: The script idna.exe is installed in 'C:\Users\HP\.python-portable\python3.15.0\python\Scripts' which is not on PATH.
+      Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+      WARNING: The scripts fonttools.exe, pyftmerge.exe, pyftsubset.exe and ttx.exe are installed in 'C:\Users\HP\.python-portable\python3.15.0\python\Scripts' which is not on PATH.
+      Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+      WARNING: The script normalizer.exe is installed in 'C:\Users\HP\.python-portable\python3.15.0\python\Scripts' which is not on PATH.
+      Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+      WARNING: The script cffi-gen-src.exe is installed in 'C:\Users\HP\.python-portable\python3.15.0\python\Scripts' which is not on PATH.
+      Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+[OK] Cai thu vien tu requirements.txt (exit code 0)
+
+[*] Kiem tra import thu vien:
+    [OK]  customtkinter  6.0.0
+    [OK]  PIL            12.3.0
+    [OK]  numpy          2.5.4
+    [OK]  pandas         3.0.6
+    [OK]  sklearn        1.9.1
+    [OK]  joblib         1.6.0
+    [OK]  matplotlib     3.11.2
+    [OK]  Crypto         3.24.1
+    [OK]  cryptography   50.0.2
+    [OK]  sympy          1.14.0
+    [OK]  requests       2.34.2
+    [OK]  tkinter        
+
+$ C:\Users\HP\.python-portable\python3.15.0\python\python.exe -c import joblib; m=joblib.load('models/best_model.joblib'); p=joblib.load('models/preprocessor.joblib'); print(type(m).__name__, 'n_features =', m.n_features_in_)
+    RandomForestClassifier n_features = 122
+[OK] Nap models/best_model.joblib + preprocessor.joblib (exit code 0)
+
+$ C:\Users\HP\.python-portable\python3.15.0\python\python.exe -m unittest discover -s cross_dataset/tests -t .
+    ==============================================================================
+    [Da lop - 5 lop NSL-KDD]
+      Accuracy        :  60.70%
+      F1 (weighted)   :  45.86%
+      F1 (macro)      :  15.11%
+      Confusion Matrix (hang = thuc te, cot = du doan):
+                       dos    normal     probe       r2l       u2r
+        dos              0       614         0         0         0
+        normal           0     1,821         0         0         0
+        probe            0       206         0         0         0
+        r2l              0       329         0         0         0
+        u2r              0        30         0         0         0
+    
+    [Nhi phan - Normal vs Attack]
+      Accuracy        :  60.70%
+      Precision       :   0.00%
+      Recall (DR)     :   0.00%
+      F1-Score        :   0.00%
+      False Pos. Rate :   0.00%
+      ROC-AUC         : 0.5013
+      CM: TN=1,821  FP=0  FN=1,179  TP=0
+    
+    [Ty le bi danh dau la TAN CONG theo nhan goc]
+      normal             n=    1,821   -> attack:   0.00%
+      generic            n=      315   -> attack:   0.00%
+      exploits           n=      279   -> attack:   0.00%
+      fuzzers            n=      173   -> attack:   0.00%
+      reconnaissance     n=      146   -> attack:   0.00%
+      dos                n=       95   -> attack:   0.00%
+      analysis           n=       60   -> attack:   0.00%
+      backdoors          n=       50   -> attack:   0.00%
+      worms              n=       31   -> attack:   0.00%
+      shellcode          n=       30   -> attack:   0.00%
+    ==============================================================================
+    [+] Da luu bao cao tai: C:\Users\HP\AppData\Local\Temp\tmp49gphr9h\reports\unsw-nb15_20261014_151445
+    ......
+    ----------------------------------------------------------------------
+    Ran 6 tests in 1.112s
+    
+    OK
+[OK] Unit test cross_dataset (exit code 0)
+
+$ C:\Users\HP\.python-portable\python3.15.0\python\python.exe -m cross_dataset.run_inference --dataset nsl-kdd --input data/raw/KDDTest+.txt --compare-baseline
+      smurf              n=      665   -> attack: 100.00%
+      back               n=      359   -> attack: 100.00%
+      snmpguess          n=      331   -> attack:   0.00%
+      saint              n=      319   -> attack:  98.75%
+      mailbomb           n=      293   -> attack:   0.00%
+      snmpgetattack      n=      178   -> attack:   0.00%
+      portsweep          n=      157   -> attack: 100.00%
+      ipsweep            n=      141   -> attack: 100.00%
+      httptunnel         n=      133   -> attack:  11.28%
+      nmap               n=       73   -> attack: 100.00%
+      pod                n=       41   -> attack:  95.12%
+      buffer_overflow    n=       20   -> attack:  20.00%
+      multihop           n=       18   -> attack:  16.67%
+      named              n=       17   -> attack:  11.76%
+      ps                 n=       15   -> attack:  13.33%
+      sendmail           n=       14   -> attack:   0.00%
+      rootkit            n=       13   -> attack:   0.00%
+      xterm              n=       13   -> attack:  30.77%
+      teardrop           n=       12   -> attack: 100.00%
+      xlock              n=        9   -> attack:  11.11%
+      land               n=        7   -> attack:  71.43%
+      xsnoop             n=        4   -> attack:  25.00%
+      ftp_write          n=        3   -> attack:  33.33%
+      loadmodule         n=        2   -> attack:   0.00%
+      perl               n=        2   -> attack:   0.00%
+      phf                n=        2   -> attack:  50.00%
+      sqlattack          n=        2   -> attack:   0.00%
+      udpstorm           n=        2   -> attack: 100.00%
+      worm               n=        2   -> attack:   0.00%
+      imap               n=        1   -> attack:   0.00%
+    ==============================================================================
+    
+    [Doi chieu voi luong cu - models/evaluation_results.json]
+      accuracy          : moi=0.743346  cu=0.743346  KHOP
+      f1_weighted       : moi=0.698254  cu=0.698254  KHOP
+      binary_precision  : moi=0.966433  cu=0.966433  KHOP
+      binary_recall     : moi=0.590041  cu=0.590041  KHOP
+      => PIPELINE MOI TAI LAP CHINH XAC LUONG CU
+    [+] Da luu bao cao tai: D:\LDPlayer\nids-machine-learning\reports\cross_dataset\nsl-kdd_20261014_151448
+    Matplotlib is building the font cache; this may take a moment.
+[OK] Doi chung KDDTest+ qua pipeline moi (exit code 0)
+
+======================================================================
+  TONG KET
+======================================================================
+  [OK]  pip
+  [OK]  pip install
+  [OK]  import
+  [OK]  load model
+  [OK]  unit test
+  [OK]  doi chung KDDTest+
+
+=> MOI TRUONG SAN SANG - co the chay main.py  (469s)
+   Log day du: D:\LDPlayer\nids-machine-learning\setup_env.log
