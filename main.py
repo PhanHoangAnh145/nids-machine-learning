@@ -667,73 +667,92 @@ class NIDSApp(ctk.CTk):
 
         ctk.CTkLabel(
             self.frame_realtime,
-            text="📡 Giám Sát & Bắt Gói Tin Thời Gian Thực",
-            font=ctk.CTkFont(size=20, weight="bold")
-        ).grid(row=0, column=0, sticky="w", pady=(0, 15))
+            text="\U0001f4e1  Giám sát thời gian thực",
+            font=ctk.CTkFont(size=22, weight="bold")
+        ).grid(row=0, column=0, sticky="w", pady=(0, 2))
+        ctk.CTkLabel(
+            self.frame_realtime,
+            text="Nhận lưu lượng \u2192 trích đặc trưng \u2192 mô hình dự đoán tấn công",
+            font=ctk.CTkFont(size=13), text_color="gray"
+        ).grid(row=0, column=0, sticky="sw", pady=(0, 14))
 
-        # Nếu thiếu module realtime -> hiện hướng dẫn, dừng tại đây
         if not REALTIME_OK:
             ctk.CTkLabel(
                 self.frame_realtime,
                 text=("Chưa dùng được module realtime.\n\n"
                       f"Chi tiết: {REALTIME_ERR}\n\n"
-                      "Hãy chắc chắn thư mục 'realtime/' nằm cùng cấp với main.py "
-                      "và đã cài: pip install scapy scikit-learn pandas joblib"),
+                      "Đảm bảo thư mục 'realtime/' nằm cùng cấp với main.py và đã cài: "
+                      "pip install scapy scikit-learn pandas joblib"),
                 justify="left", text_color="#e0a030"
-            ).grid(row=1, column=0, sticky="w", padx=10)
+            ).grid(row=1, column=0, sticky="w", padx=4)
             return
 
-        # Thanh điều khiển
-        bar = ctk.CTkFrame(self.frame_realtime)
-        bar.grid(row=1, column=0, sticky="ew", pady=(0, 15))
-        bar.grid_columnconfigure(1, weight=1)
+        # ---- Khối NGUỒN GÓI TIN -------------------------------------------
+        src = ctk.CTkFrame(self.frame_realtime)
+        src.grid(row=1, column=0, sticky="ew", pady=(0, 14))
+        src.grid_columnconfigure(5, weight=1)
+        ctk.CTkLabel(src, text="NGUỒN GÓI TIN", font=ctk.CTkFont(size=12, weight="bold"),
+                     text_color="gray").grid(row=0, column=0, columnspan=6, sticky="w",
+                                             padx=16, pady=(12, 6))
 
-        ctk.CTkLabel(bar, text="Card mạng:").grid(row=0, column=0, padx=(15, 6), pady=12)
-        self.rt_iface_menu = ctk.CTkOptionMenu(bar, values=["(bấm 🔄 để nạp)"], width=360)
-        self.rt_iface_menu.grid(row=0, column=1, padx=6, pady=12, sticky="w")
-        ctk.CTkButton(bar, text="🔄", width=36, command=self._rt_refresh_ifaces).grid(row=0, column=2, padx=6)
-
-        self.btn_rt_start = ctk.CTkButton(
-            bar, text="▶ Bắt gói trực tiếp", fg_color="#2ca02c", hover_color="#227d22",
-            command=self.start_realtime_capture)
-        self.btn_rt_start.grid(row=0, column=3, padx=6, pady=12)
-        self.btn_rt_stop = ctk.CTkButton(
-            bar, text="⏹ Dừng", fg_color="#a33", hover_color="#822", command=self.stop_realtime_capture)
-        self.btn_rt_stop.grid(row=0, column=4, padx=6, pady=12)
-        ctk.CTkButton(
-            bar, text="📂 Phát lại pcap", fg_color="#2b5b84", hover_color="#1e4160",
-            command=self.replay_pcap_file).grid(row=0, column=5, padx=(6, 15), pady=12)
-
-        # Hàng 2: nhận gói GỬI THẲNG từ Phần 2 qua localhost (không cần Npcap/quyền)
-        ctk.CTkLabel(bar, text="Nhận từ Phần 2:").grid(row=1, column=0, padx=(15, 6), pady=(0, 12))
+        # 1) Nhận từ Phần 2 (khuyên dùng) — nổi bật
+        ctk.CTkLabel(src, text="①", font=ctk.CTkFont(size=15, weight="bold"),
+                     text_color="#2ca02c").grid(row=1, column=0, padx=(16, 4), pady=8)
         self.btn_rt_listen = ctk.CTkButton(
-            bar, text="🛰 Nghe từ Phần 2", fg_color="#6a3", hover_color="#582",
+            src, text="🛰  Nhận từ Phần 2", width=180, height=36,
+            fg_color="#2ca02c", hover_color="#227d22", font=ctk.CTkFont(weight="bold"),
             command=self.toggle_listen)
-        self.btn_rt_listen.grid(row=1, column=1, padx=6, pady=(0, 12), sticky="w")
-        self.rt_listen_lbl = ctk.CTkLabel(bar, text="(đang tắt)", text_color="gray")
-        self.rt_listen_lbl.grid(row=1, column=2, columnspan=3, padx=6, pady=(0, 12), sticky="w")
+        self.btn_rt_listen.grid(row=1, column=1, padx=6, pady=8, sticky="w")
+        self.rt_listen_lbl = ctk.CTkLabel(src, text="khuyên dùng · chưa bật", text_color="gray")
+        self.rt_listen_lbl.grid(row=1, column=2, columnspan=4, padx=8, pady=8, sticky="w")
 
-        # Thẻ thống kê
+        # 2) Phát lại file pcap
+        ctk.CTkLabel(src, text="②", font=ctk.CTkFont(size=15, weight="bold"),
+                     text_color="#1f6aa5").grid(row=2, column=0, padx=(16, 4), pady=8)
+        ctk.CTkButton(
+            src, text="📂  Phát lại file .pcap", width=180, height=36,
+            command=self.replay_pcap_file).grid(row=2, column=1, padx=6, pady=8, sticky="w")
+        ctk.CTkLabel(src, text="mở một file pcap có sẵn để phân tích",
+                     text_color="gray").grid(row=2, column=2, columnspan=4, padx=8, sticky="w")
+
+        # 3) Bắt gói trực tiếp (nâng cao)
+        ctk.CTkLabel(src, text="③", font=ctk.CTkFont(size=15, weight="bold"),
+                     text_color="gray").grid(row=3, column=0, padx=(16, 4), pady=(8, 14))
+        self.btn_rt_start = ctk.CTkButton(
+            src, text="▶  Bắt trực tiếp", width=130, height=36,
+            command=self.start_realtime_capture)
+        self.btn_rt_start.grid(row=3, column=1, padx=6, pady=(8, 14), sticky="w")
+        self.btn_rt_stop = ctk.CTkButton(
+            src, text="⏹", width=44, height=36, fg_color="#a33", hover_color="#822",
+            command=self.stop_realtime_capture)
+        self.btn_rt_stop.grid(row=3, column=2, padx=(0, 6), pady=(8, 14), sticky="w")
+        self.rt_iface_menu = ctk.CTkOptionMenu(src, values=["(bấm nạp)"], width=300)
+        self.rt_iface_menu.grid(row=3, column=3, padx=6, pady=(8, 14), sticky="w")
+        ctk.CTkButton(src, text="🔄", width=40, height=36,
+                      command=self._rt_refresh_ifaces).grid(row=3, column=4, padx=(0, 6), pady=(8, 14))
+        ctk.CTkLabel(src, text="nâng cao · cần Npcap + quyền Admin",
+                     text_color="gray").grid(row=3, column=5, padx=8, pady=(8, 14), sticky="w")
+
+        # ---- Thẻ thống kê -------------------------------------------------
         stat = ctk.CTkFrame(self.frame_realtime)
-        stat.grid(row=2, column=0, sticky="ew", pady=(0, 15))
+        stat.grid(row=2, column=0, sticky="ew", pady=(0, 14))
         stat.grid_columnconfigure((0, 1, 2, 3), weight=1)
-        self.rt_card_pkt = self.create_mini_stat_card(stat, 0, "Gói Tin Bắt Được", "0", "gray")
-        self.rt_card_conn = self.create_mini_stat_card(stat, 1, "Kết Nối", "0", "#1f77b4")
-        self.rt_card_atk = self.create_mini_stat_card(stat, 2, "Bị Tấn Công", "0", "#d62728")
-        self.rt_card_rate = self.create_mini_stat_card(stat, 3, "Tỷ Lệ Tấn Công", "0.0%", "#ff7f0e")
+        self.rt_card_pkt = self.create_mini_stat_card(stat, 0, "Gói tin nhận", "0", "gray")
+        self.rt_card_conn = self.create_mini_stat_card(stat, 1, "Kết nối", "0", "#1f77b4")
+        self.rt_card_atk = self.create_mini_stat_card(stat, 2, "Bị tấn công", "0", "#d62728")
+        self.rt_card_rate = self.create_mini_stat_card(stat, 3, "Tỷ lệ tấn công", "0.0%", "#ff7f0e")
 
-        # Bảng kết nối phát hiện được
+        # ---- Bảng kết nối -------------------------------------------------
         tbl = ctk.CTkFrame(self.frame_realtime)
         tbl.grid(row=3, column=0, sticky="nsew")
         tbl.grid_rowconfigure(0, weight=1)
         tbl.grid_columnconfigure(0, weight=1)
-
         cols = ("time", "src", "dst", "service", "flag", "prediction", "confidence", "status")
         self.rt_tree = ttk.Treeview(tbl, columns=cols, show="headings", selectmode="browse")
         for c, t, w, a in [
-            ("time", "Thời gian", 90, "center"), ("src", "Nguồn", 150, "w"),
-            ("dst", "Đích", 150, "w"), ("service", "Dịch vụ", 90, "center"),
-            ("flag", "Cờ", 70, "center"), ("prediction", "Dự đoán", 150, "w"),
+            ("time", "Thời gian", 90, "center"), ("src", "Nguồn", 160, "w"),
+            ("dst", "Đích", 160, "w"), ("service", "Dịch vụ", 90, "center"),
+            ("flag", "Cờ", 70, "center"), ("prediction", "Dự đoán", 170, "w"),
             ("confidence", "Tin cậy", 80, "center"), ("status", "Cảnh báo", 150, "center"),
         ]:
             self.rt_tree.heading(c, text=t)
@@ -742,11 +761,12 @@ class NIDSApp(ctk.CTk):
         self.rt_tree.configure(yscrollcommand=scroll.set)
         self.rt_tree.grid(row=0, column=0, sticky="nsew")
         scroll.grid(row=0, column=1, sticky="ns")
-        self.rt_tree.tag_configure("attack", background="#ffcccc", foreground="#990000")
-        self.rt_tree.tag_configure("normal", background="#e6ffe6", foreground="#006600")
+        self.rt_tree.tag_configure("attack", background="#ffd6d6", foreground="#8b0000")
+        self.rt_tree.tag_configure("normal", background="#ddf5dd", foreground="#145a14")
 
-        self.rt_status = ctk.CTkLabel(self.frame_realtime, text="Sẵn sàng.", anchor="w", text_color="gray")
-        self.rt_status.grid(row=4, column=0, sticky="ew", pady=(8, 0))
+        self.rt_status = ctk.CTkLabel(self.frame_realtime, text="Sẵn sàng.",
+                                      anchor="w", text_color="gray")
+        self.rt_status.grid(row=4, column=0, sticky="ew", pady=(10, 0))
 
         self._rt_refresh_ifaces()
 
@@ -868,17 +888,18 @@ class NIDSApp(ctk.CTk):
         if getattr(self, "rt_listening", False):
             self.rt_listen_stop.set()
             self.rt_listening = False
-            self.btn_rt_listen.configure(text="🛰 Nghe từ Phần 2")
-            self.rt_listen_lbl.configure(text="(đang tắt)", text_color="gray")
+            self.btn_rt_listen.configure(text="🛰  Nhận từ Phần 2", fg_color="#2ca02c",
+                                         hover_color="#227d22")
+            self.rt_listen_lbl.configure(text="khuyên dùng · chưa bật", text_color="gray")
             return
         # bật
         self._rt_new_engine()
         self.rt_listen_stop = threading.Event()
         self.rt_listening = True
-        self.btn_rt_listen.configure(text="⏹ Dừng nghe")
+        self.btn_rt_listen.configure(text="⏹  Dừng nhận", fg_color="#a33", hover_color="#822")
         self.rt_listen_lbl.configure(
-            text=(f"Đang nghe cổng {self.LISTEN_PORT} — cùng máy: 127.0.0.1 | "
-                  f"máy khác trỏ tới: {self._lan_ip()}:{self.LISTEN_PORT}"),
+            text=(f"● Đang nghe cổng {self.LISTEN_PORT}  —  cùng máy: 127.0.0.1   •   "
+                  f"máy khác: {self._lan_ip()}:{self.LISTEN_PORT}"),
             text_color="#2ca02c")
         threading.Thread(target=self._listen_server, daemon=True).start()
 
