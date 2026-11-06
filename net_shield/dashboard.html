@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NIDS SHIELD · IPS</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#191d2e; --card2:#1f2438; --line:#2a3048;
+    --text:#e8eaf2; --muted:#8b93a7;
+    --green:#2ecc71; --red:#e74c3c; --blue:#4aa3ff; --orange:#f39c12;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  header{display:flex;align-items:center;gap:14px;padding:18px 24px;border-bottom:1px solid var(--line)}
+  header h1{font-size:20px;margin:0}
+  .sub{color:var(--muted);font-size:13px}
+  .pill{margin-left:auto;padding:6px 14px;border-radius:999px;font-weight:700;font-size:13px}
+  .pill.on{background:rgba(46,204,113,.15);color:var(--green)}
+  .pill.off{background:rgba(139,147,167,.15);color:var(--muted)}
+  .wrap{padding:20px 24px;max-width:1200px;margin:0 auto}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  select,button{font-size:14px;border-radius:8px;border:1px solid var(--line);padding:9px 12px}
+  select{background:var(--card2);color:var(--text);min-width:260px}
+  button{cursor:pointer;color:#fff;border:none;font-weight:600}
+  .b-start{background:var(--green)} .b-stop{background:var(--red)} .b-ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .warn{color:var(--orange);font-size:13px}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .tile .k{color:var(--muted);font-size:13px} .tile .v{font-size:30px;font-weight:800;margin-top:6px}
+  .grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}.tiles{grid-template-columns:repeat(2,1fr)}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .panel h2{font-size:14px;margin:0;padding:12px 16px;border-bottom:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--muted);font-weight:600}
+  tr.atk td{background:rgba(231,76,60,.10)}
+  .tag{padding:2px 8px;border-radius:6px;font-weight:700;font-size:12px}
+  .tag.atk{background:rgba(231,76,60,.18);color:var(--red)} .tag.ok{background:rgba(46,204,113,.15);color:var(--green)}
+  .blk{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+  .blk code{color:var(--red);font-weight:700}
+  .blk button{background:var(--card2);color:var(--text);border:1px solid var(--line);padding:5px 10px;font-size:12px}
+  .empty{color:var(--muted);padding:16px;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡️ NIDS SHIELD <span class="sub">· Hệ thống ngăn chặn xâm nhập (IPS)</span></h1>
+  <span id="pill" class="pill off">● Đang tắt</span>
+</header>
+<div class="wrap">
+  <div class="controls">
+    <select id="iface"><option>Đang nạp card mạng…</option></select>
+    <button class="b-start" id="start">▶ Bắt đầu</button>
+    <button class="b-stop" id="stop" disabled>⏹ Dừng</button>
+    <button class="b-ghost" id="refresh">🔄 Card mạng</button>
+    <span id="adminwarn" class="warn"></span>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="k">Gói tin</div><div class="v" id="t-pkt">0</div></div>
+    <div class="tile"><div class="k">Kết nối</div><div class="v" id="t-conn">0</div></div>
+    <div class="tile"><div class="k">Tấn công</div><div class="v" id="t-atk" style="color:var(--red)">0</div></div>
+    <div class="tile"><div class="k">IP đã chặn</div><div class="v" id="t-blk" style="color:var(--orange)">0</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Cảnh báo gần đây</h2>
+      <div style="max-height:52vh;overflow:auto">
+        <table><thead><tr><th>Lúc</th><th>Nguồn</th><th>Đích</th><th>Dịch vụ</th><th>Cờ</th><th>Phân loại</th><th>Tin cậy</th><th>Hành động</th></tr></thead>
+        <tbody id="alerts"></tbody></table>
+        <div class="empty" id="alerts-empty">Chưa có cảnh báo. Bấm “Bắt đầu” để giám sát.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>IP đang bị chặn</h2>
+      <div id="blocked"></div>
+      <div class="empty" id="blocked-empty">Chưa chặn IP nào.</div>
+    </div>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+async function api(path,method="GET",body){
+  const o={method,headers:{"Content-Type":"application/json"}};
+  if(body)o.body=JSON.stringify(body);
+  return (await fetch(path,o)).json();
+}
+async function loadIfaces(){
+  const r=await api("/api/ifaces");
+  const sel=$("iface"); sel.innerHTML="";
+  (r.ifaces||[]).forEach(x=>{const o=document.createElement("option");o.textContent=x;sel.appendChild(o);});
+  if(!r.ifaces||!r.ifaces.length){sel.innerHTML="<option>(cần cài scapy)</option>";}
+}
+$("refresh").onclick=loadIfaces;
+$("start").onclick=async()=>{const r=await api("/api/start","POST",{iface:$("iface").value});if(!r.ok)alert(r.msg);};
+$("stop").onclick=()=>api("/api/stop","POST");
+async function unblock(ip){await api("/api/unblock","POST",{ip});}
+function render(s){
+  $("pill").className="pill "+(s.running?"on":"off");
+  $("pill").textContent=s.running?("● Đang giám sát · "+(s.iface||"")):"● Đang tắt";
+  $("start").disabled=s.running; $("stop").disabled=!s.running;
+  $("adminwarn").textContent=s.admin?"":"⚠ Chưa chạy bằng Administrator → chỉ cảnh báo, chưa chặn thật.";
+  $("t-pkt").textContent=s.stats.packets; $("t-conn").textContent=s.stats.connections;
+  $("t-atk").textContent=s.stats.attacks; $("t-blk").textContent=s.stats.blocked;
+  const tb=$("alerts"); tb.innerHTML="";
+  $("alerts-empty").style.display=s.alerts.length?"none":"block";
+  s.alerts.forEach(a=>{
+    const tr=document.createElement("tr"); if(a.is_attack)tr.className="atk";
+    const tag=a.is_attack?`<span class="tag atk">${a.category.toUpperCase()}</span>`:`<span class="tag ok">sạch</span>`;
+    tr.innerHTML=`<td>${a.ts}</td><td>${a.src}</td><td>${a.dst}</td><td>${a.service}</td><td>${a.flag}</td><td>${tag}</td><td>${a.confidence}%</td><td>${a.action}</td>`;
+    tb.appendChild(tr);
+  });
+  const bd=$("blocked"); bd.innerHTML="";
+  $("blocked-empty").style.display=s.blocked.length?"none":"block";
+  s.blocked.forEach(b=>{
+    const d=document.createElement("div"); d.className="blk";
+    d.innerHTML=`<code>${b.ip}</code> <button>Gỡ chặn</button>`;
+    d.querySelector("button").onclick=()=>unblock(b.ip);
+    bd.appendChild(d);
+  });
+}
+async function tick(){try{render(await api("/api/state"));}catch(e){}}
+loadIfaces(); tick(); setInterval(tick,1500);
+</script>
+</body>
+</html>
