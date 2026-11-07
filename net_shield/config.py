@@ -36,4 +36,8 @@ class IPSConfig:
     max_attacks: int = 300              # số dòng trong bảng "Tấn công"
     replay_delay: float = 0.04          # giãn nhịp khi phát lại pcap (để kịp xem)
 
+    # ---- truy cập dashboard từ máy khác trong LAN ----------------------
+    allow_lan: bool = False             # True: mở cho máy khác cùng mạng (bind 0.0.0.0)
+    dashboard_password: str = ""        # mật khẩu Basic Auth khi mở LAN (trống -> tự sinh)
+
     whitelist: List[str] = field(default_factory=list)   # IP không bao giờ chặn

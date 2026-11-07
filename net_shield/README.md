@@ -62,6 +62,26 @@ Hạn chế: quét cổng rất chậm (vd `nmap -T1`) sẽ lọt ngưỡng.
 Khi khởi động lại, các luật `NIDS_SHIELD_*` còn trong Windows Firewall được đọc
 lại và hiện trên dashboard.
 
+## Mở dashboard cho máy khác cùng mạng (LAN)
+Mặc định dashboard chỉ mở ở `127.0.0.1` (chỉ máy chạy shield xem). Để máy khác
+trong cùng mạng mở được bằng trình duyệt:
+```bash
+python -m net_shield --lan            # hoặc nhấp CHAY_NET_SHIELD_LAN.bat (Run as administrator)
+# tùy chọn: --pass=matkhau  --port=8081
+```
+Lõi (bắt gói, chặn IP) VẪN chạy trên máy này — chỉ giao diện được mở ra. Khi bật
+`--lan`:
+- Bind `0.0.0.0`; máy khác mở `http://<IP-máy-shield>:8081` (console in sẵn các
+  địa chỉ dùng được).
+- BẮT BUỘC đăng nhập (HTTP Basic Auth): user bất kỳ, mật khẩu in ra console
+  (hoặc đặt bằng `--pass=`). Dashboard có nút điều khiển thật nên không để mở trần.
+- Lần đầu Windows Firewall hỏi "Allow access" -> tick **Private networks**.
+
+> Basic Auth trên HTTP KHÔNG mã hoá đường truyền (chưa có HTTPS) — chỉ dùng trong
+> mạng lab, không mở ra Internet công khai. Không thể đưa lõi lên host đám mây
+> (Vercel/VPS...) vì máy chủ đó không thấy card mạng và không điều khiển được
+> firewall của bạn.
+
 ## Demo 1 máy: phát lại pcap
 Chọn file ở ô "Demo 1 máy" → **⏯ Phát lại pcap**. File đi qua đúng luồng gom kết
 nối → mô hình → chặn, nhưng chặn ở chế độ **mô phỏng** (không đụng tường lửa, vì
