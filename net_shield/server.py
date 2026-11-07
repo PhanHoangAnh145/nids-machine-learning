@@ -11,9 +11,13 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 from .config import IPSConfig
-from .controller import IPSController, list_ifaces
+from .controller import IPSController, list_ifaces, list_pcaps
 
 _HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard.html")
+
+
+def _norm(s) -> str:
+    return " ".join(str(s).split())
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -27,6 +31,7 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Connection", "close")
         self.end_headers()
         self.wfile.write(data)
@@ -49,6 +54,7 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(page)))
+            self.send_header("Cache-Control", "no-store")
             self.send_header("Connection", "close")
             self.end_headers()
             self.wfile.write(page)
@@ -57,6 +63,9 @@ class _Handler(BaseHTTPRequestHandler):
         elif path == "/api/ifaces":
             srv.iface_map = list_ifaces()
             self._json({"ifaces": list(srv.iface_map.keys())})
+        elif path == "/api/pcaps":
+            srv.pcap_map = list_pcaps()
+            self._json({"pcaps": list(srv.pcap_map.keys())})
         else:
             self._json({"error": "not found"}, 404)
 
@@ -66,12 +75,33 @@ class _Handler(BaseHTTPRequestHandler):
         body = self._body()
         if path == "/api/start":
             label = body.get("iface", "")
-            iface = srv.iface_map.get(label, label)
+            iface = srv.iface_map.get(label)
+            if iface is None:
+                # Trình duyệt có thể gộp khoảng trắng trong nhãn -> so khớp lỏng
+                for k, v in srv.iface_map.items():
+                    if _norm(k) == _norm(label):
+                        iface = v
+                        break
+                else:
+                    iface = label
             ok, msg = srv.controller.start(iface)
             self._json({"ok": ok, "msg": msg})
+        elif path == "/api/replay":
+            # Chỉ nhận tên nằm trong danh sách đã liệt kê (không nhận đường dẫn tuỳ ý)
+            if not srv.pcap_map:
+                srv.pcap_map = list_pcaps()
+            p = srv.pcap_map.get(body.get("name", ""))
+            if p is None:
+                self._json({"ok": False, "msg": "Không có file pcap này."})
+            else:
+                ok, msg = srv.controller.replay(p)
+                self._json({"ok": ok, "msg": msg})
         elif path == "/api/stop":
             srv.controller.stop()
             self._json({"ok": True, "msg": "Đã dừng."})
+        elif path == "/api/reset":
+            ok, msg = srv.controller.reset()
+            self._json({"ok": ok, "msg": msg})
         elif path == "/api/unblock":
             ok = srv.controller.unblock(body.get("ip", ""))
             self._json({"ok": ok})
@@ -87,6 +117,7 @@ class DashboardServer(ThreadingHTTPServer):
         super().__init__((cfg.dashboard_host, cfg.dashboard_port), _Handler)
         self.controller = controller
         self.iface_map = {}
+        self.pcap_map = {}
 
 
 def run(cfg: IPSConfig = None, open_browser: bool = True):
