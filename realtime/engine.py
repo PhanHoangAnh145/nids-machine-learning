@@ -157,8 +157,27 @@ class RealtimeEngine:
                 if on_prediction:
                     on_prediction(pred)
 
-        sniffer = AsyncSniffer(iface=iface, filter=self.cfg.bpf_filter, prn=_handle, store=False)
-        sniffer.start()
+        # Khởi động sniffer theo nhiều cấp dự phòng (Windows hay kén tên card /
+        # bộ lọc BPF): thử (card + lọc) -> (card, bỏ lọc) -> (mặc định + lọc) ->
+        # (mặc định, bỏ lọc). Nhờ vậy nếu tên card không khớp vẫn bắt được.
+        attempts = [
+            dict(iface=iface, filter=self.cfg.bpf_filter),
+            dict(iface=iface),
+            dict(filter=self.cfg.bpf_filter),
+            dict(),
+        ]
+        sniffer = None
+        last_err = None
+        for kw in attempts:
+            try:
+                sniffer = AsyncSniffer(prn=_handle, store=False, **kw)
+                sniffer.start()
+                break
+            except Exception as exc:  # noqa: BLE001
+                last_err = exc
+                sniffer = None
+        if sniffer is None:
+            raise RuntimeError(f"không mở được sniffer ({last_err})")
         try:
             while not stop_event.is_set():
                 stop_event.wait(self.cfg.poll_interval)

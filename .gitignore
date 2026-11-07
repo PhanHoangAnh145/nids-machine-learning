@@ -45,3 +45,10 @@ logs/
 logs/
 *.key
 *.pem
+# ----- NIDS: file sinh ra / rac, khong day len GitHub -----
+*.zip
+*_diag.log
+pcaps/
+**/output/
+generated_*.pcap
+# (giu lai cac file mau trong */templates/*.pcap)
