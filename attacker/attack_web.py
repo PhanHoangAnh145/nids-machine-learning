@@ -132,56 +132,148 @@ def stop_current():
 PAGE = """<!doctype html><html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Lab Attacker · kiểm thử net_shield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0f1220;--card:#191d2e;--line:#2a3048;--text:#e8eaf2;--muted:#8b93a7;
---red:#e74c3c;--green:#2ecc71;--blue:#4aa3ff;--orange:#f39c12}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,sans-serif;
-background:var(--bg);color:var(--text)}
-.wrap{max-width:720px;margin:0 auto;padding:24px}
-h1{font-size:20px}.sub{color:var(--muted);font-size:13px;margin-top:-6px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:16px}
-label{font-size:13px;color:var(--muted)}
-input{width:100%;margin-top:6px;padding:10px;border-radius:8px;border:1px solid var(--line);
-background:#0f1322;color:var(--text);font-size:15px}
-.row{display:flex;gap:12px}.row>div{flex:1}
-.btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-button{cursor:pointer;border:none;border-radius:10px;padding:16px;font-size:15px;font-weight:700;color:#fff}
-.flood{background:var(--red)}.scan{background:var(--blue)}.slow{background:var(--orange)}.stop{background:#333a52;grid-column:1/3}
-.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-.tile{background:#0f1322;border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center}
-.tile .k{color:var(--muted);font-size:12px}.tile .v{font-size:26px;font-weight:800;margin-top:4px}
-.on{color:var(--green)}.off{color:var(--muted)}
-.warn{background:rgba(243,156,18,.12);border:1px solid rgba(243,156,18,.4);color:var(--orange);
-border-radius:10px;padding:10px 14px;font-size:13px;margin-top:16px}
-.status{margin-top:14px;font-size:14px}
-</style></head><body><div class="wrap">
-<h1>🎯 Lab Attacker</h1>
-<p class="sub">Tạo lưu lượng tấn công để kiểm thử net_shield — chỉ nhắm máy của chính bạn.</p>
+  :root{
+    color-scheme:dark;
+    --bg:#0B0F17; --surface:#111827; --surface-2:#0E1420; --raised:#1F2937;
+    --line:rgba(255,255,255,.07); --line-strong:#374151;
+    --text:#E5E7EB; --text-2:#9CA3AF; --text-3:#6B7280;
+    --green:#34D399; --red:#F87171; --blue:#60A5FA; --amber:#FBBF24; --orange:#FB923C;
+    --font:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+    --mono:"JetBrains Mono","Fira Code",ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{background:var(--bg)}
+  body{margin:0;font-family:var(--font);font-size:13px;line-height:1.45;color:var(--text);
+    -webkit-font-smoothing:antialiased}
+  svg.i{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;
+    stroke-linecap:round;stroke-linejoin:round}
+  .m{font-family:var(--mono);font-variant-numeric:tabular-nums}
 
-<div class="card">
-  <div class="row">
-    <div><label>IP đích (máy chạy net_shield)</label>
-      <input id="ip" value="192.168.137.1"></div>
-    <div><label>Cổng (cho chế độ Flood)</label>
-      <input id="port" value="80"></div>
-  </div>
-  <div class="btns">
-    <button class="flood" onclick="go('flood')">🌊 SYN Flood<br><small>dồn 1 cổng → DoS (chặn tức thì)</small></button>
-    <button class="scan" onclick="go('scan')">🔍 Quét cổng<br><small>1–2000 → Probe (nhanh)</small></button>
-    <button class="slow" onclick="go('slow')">🐢 Flood chậm<br><small>DoS chậm → đếm bò lên 20/5s rồi chặn</small></button>
-    <button class="slow" onclick="go('slowscan')">🐢 Quét chậm<br><small>Probe chậm → đếm bò lên 20/5s rồi chặn</small></button>
-    <button class="stop" onclick="stop()">⏹ Dừng tấn công</button>
-  </div>
-  <div class="tiles">
-    <div class="tile"><div class="k">Trạng thái</div><div class="v" id="run">—</div></div>
-    <div class="tile"><div class="k">Gói đã bắn</div><div class="v" id="sent">0</div></div>
-    <div class="tile"><div class="k">Cổng mở gặp</div><div class="v" id="hits">0</div></div>
-  </div>
-  <div class="status" id="status">Chưa chạy.</div>
-</div>
+  header{height:56px;display:flex;align-items:center;gap:12px;padding:0 24px;
+    border-bottom:1px solid var(--line);background:var(--bg)}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0}
+  .brand .logo{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;
+    background:var(--raised);border:1px solid var(--line-strong);color:var(--red)}
+  .brand h1{font-size:14px;font-weight:600;margin:0;letter-spacing:.01em}
+  .brand .sep{width:1px;height:16px;background:var(--line-strong)}
+  .brand .sub{color:var(--text-3);font-size:13px;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pill{margin-left:auto;display:inline-flex;align-items:center;gap:8px;height:26px;padding:0 10px;
+    border-radius:4px;border:1px solid var(--line);background:var(--surface);
+    font-family:var(--mono);font-size:12px;color:var(--text-2);white-space:nowrap}
+  .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--text-3);flex:none}
+  .pill.on{color:var(--text)}
+  .pill.on::before{background:var(--red);box-shadow:0 0 0 3px rgba(248,113,113,.15);animation:pulse 1.4s infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 5px rgba(248,113,113,.04)}}
 
-<div class="warn">⚠ Công cụ dành cho phòng lab. Chỉ nhắm máy/mạng bạn sở hữu
-(vd hotspot của bạn). Không dùng để nhắm máy người khác.</div>
+  .wrap{max-width:860px;margin:0 auto;padding:20px 24px 32px;display:flex;flex-direction:column;gap:16px}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .ph{display:flex;align-items:center;gap:8px;padding:0 16px;height:44px;border-bottom:1px solid var(--line)}
+  .ph h2{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin:0}
+  .ph h2 svg{color:var(--text-2)}
+  .ph .hint{color:var(--text-3);font-size:12px;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .body{padding:16px}
+
+  .row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:200px}
+  label{display:block;font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text-2);margin-bottom:6px}
+  input{width:100%;height:36px;padding:0 12px;border-radius:4px;border:1px solid var(--line-strong);
+    background:var(--surface-2);color:var(--text);font-family:var(--mono);
+    font-variant-numeric:tabular-nums;font-size:13px;outline:none;transition:border-color .15s}
+  input:hover{border-color:#4B5563}
+  input:focus-visible{border-color:var(--blue);box-shadow:0 0 0 3px rgba(96,165,250,.18)}
+
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  button{display:flex;align-items:flex-start;gap:10px;text-align:left;cursor:pointer;
+    border:1px solid var(--line-strong);border-radius:4px;padding:11px 13px;
+    background:var(--raised);color:var(--text);font-family:var(--font);
+    transition:background .15s,border-color .15s}
+  button:hover{background:#273244;border-color:#4B5563}
+  button:active{background:#1B2430}
+  button:focus-visible{border-color:var(--blue);box-shadow:0 0 0 3px rgba(96,165,250,.18);outline:none}
+  button .ico{width:26px;height:26px;flex:none;border-radius:4px;display:grid;place-items:center;
+    background:var(--surface-2);border:1px solid var(--line);margin-top:1px}
+  button .txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+  button .t{font-size:13px;font-weight:600}
+  button .d{font-size:11.5px;color:var(--text-3);font-weight:400;line-height:1.35}
+  .act-flood .ico{color:var(--red)} .act-scan .ico{color:var(--blue)} .act-slow .ico{color:var(--amber)}
+  .btn-stop{grid-column:1/3;justify-content:center;align-items:center;color:var(--text-2)}
+  .btn-stop:hover{color:var(--red);border-color:rgba(248,113,113,.45);background:rgba(248,113,113,.06)}
+  .btn-stop .t{font-weight:500}
+
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface-2);
+    border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-top:16px}
+  .kpi{padding:12px 16px 13px;border-left:1px solid var(--line)}
+  .kpi:first-child{border-left:none}
+  .kpi .k{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:500;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--text-2)}
+  .kpi .k::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--dot,var(--text-3));flex:none}
+  .kpi.c-red{--dot:var(--red)} .kpi.c-blue{--dot:var(--blue)}
+  .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:22px;font-weight:500;
+    margin-top:6px;letter-spacing:-.01em;color:var(--text)}
+  .v.on{color:#FCA5A5} .v.off{color:var(--text-3)}
+
+  .status{margin-top:14px;font-family:var(--mono);font-variant-numeric:tabular-nums;
+    font-size:12px;color:var(--text-2);padding:9px 12px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:4px}
+  .warn{display:flex;gap:10px;align-items:flex-start;color:var(--amber);font-size:12.5px;line-height:1.45;
+    background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.22);border-radius:6px;padding:12px 14px}
+  .warn svg{margin-top:1px}
+  @media(max-width:560px){header{padding:0 16px}.wrap{padding:16px}.brand .sub,.brand .sep{display:none}
+    .btns{grid-template-columns:1fr}.btn-stop{grid-column:auto}}
+</style></head><body>
+<header>
+  <div class="brand">
+    <span class="logo"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></span>
+    <h1>Lab Attacker</h1>
+    <span class="sep"></span>
+    <span class="sub">Công cụ kiểm thử net_shield</span>
+  </div>
+  <span id="pill" class="pill off">Tắt</span>
+</header>
+<div class="wrap">
+  <section class="panel">
+    <div class="ph">
+      <h2><svg class="i" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Sinh lưu lượng tấn công</h2>
+      <span class="hint">Chỉ nhắm máy của chính bạn</span>
+    </div>
+    <div class="body">
+      <div class="row">
+        <div><label>IP đích (máy chạy net_shield)</label>
+          <input id="ip" value="192.168.137.1"></div>
+        <div><label>Cổng (cho chế độ Flood)</label>
+          <input id="port" value="80"></div>
+      </div>
+      <div class="btns">
+        <button class="act-flood" onclick="go('flood')">
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M3 15h18M6 15a6 6 0 0 1 12 0M12 3v6M9 6l3-3 3 3"/></svg></span>
+          <span class="txt"><span class="t">SYN Flood</span><span class="d">Dồn 1 cổng → DoS (chặn tức thì)</span></span></button>
+        <button class="act-scan" onclick="go('scan')">
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+          <span class="txt"><span class="t">Quét cổng</span><span class="d">1–2000 → Probe (nhanh)</span></span></button>
+        <button class="act-slow" onclick="go('slow')">
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+          <span class="txt"><span class="t">Flood chậm</span><span class="d">DoS chậm → đếm bò lên 20/5s rồi chặn</span></span></button>
+        <button class="act-slow" onclick="go('slowscan')">
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+          <span class="txt"><span class="t">Quét chậm</span><span class="d">Probe chậm → đếm bò lên 20/5s rồi chặn</span></span></button>
+        <button class="btn-stop" onclick="stop()">
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1.5"/></svg></span>
+          <span class="txt"><span class="t">Dừng tấn công</span></span></button>
+      </div>
+      <div class="kpis">
+        <div class="kpi c-red"><div class="k">Trạng thái</div><div class="v off" id="run">—</div></div>
+        <div class="kpi"><div class="k">Gói đã bắn</div><div class="v" id="sent">0</div></div>
+        <div class="kpi c-blue"><div class="k">Cổng mở gặp</div><div class="v" id="hits">0</div></div>
+      </div>
+      <div class="status" id="status">Chưa chạy.</div>
+    </div>
+  </section>
+
+  <div class="warn"><svg class="i" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+    <span>Công cụ dành cho phòng lab. Chỉ nhắm máy/mạng bạn sở hữu (ví dụ hotspot của bạn). Không dùng để nhắm máy người khác.</span></div>
 </div>
 <script>
 const $=i=>document.getElementById(i);
@@ -196,6 +288,8 @@ async function tick(){
   try{const s=await (await fetch("/api/state")).json();
     $("run").textContent=s.running?"ĐANG CHẠY":"Tắt";
     $("run").className="v "+(s.running?"on":"off");
+    $("pill").className="pill "+(s.running?"on":"off");
+    $("pill").textContent=s.running?"Đang tấn công":"Tắt";
     $("sent").textContent=s.sent; $("hits").textContent=s.hits;
     if(s.running){
       const sec=((Date.now()/1000)-s.started)||1;

@@ -27,8 +27,8 @@ python -m net_shield          # mở dashboard tại http://127.0.0.1:8081
 ```
 (nhấp đúp `MO_PHAN3_NETSHIELD.bat` — nên "Run as administrator").
 
-Trên dashboard: chọn **card mạng** → **▶ Bắt đầu**. Khi có tấn công, bảng "Cảnh
-báo gần đây" đổ dòng đỏ, ô "IP đã chặn" tăng; mỗi IP có nút **Gỡ chặn**.
+Trên dashboard: chọn **card mạng** → **Bắt đầu**. Khi có tấn công, bảng "Tấn
+công phát hiện" hiện dòng đỏ, ô "IP đã chặn" tăng; mỗi IP có nút **Gỡ chặn**.
 
 ## Dashboard
 - **Tấn công phát hiện**: chỉ các kết nối mô hình phân loại là tấn công (dòng đỏ =
@@ -37,7 +37,7 @@ báo gần đây" đổ dòng đỏ, ô "IP đã chặn" tăng; mỗi IP có nú
 - **Thiết bị trong mạng**: IP nội bộ (10/8, 172.16/12, 192.168/16) có kết nối
   TRỰC TIẾP (unicast) với máy shield hoặc đi qua shield, + nguồn tấn công bên
   ngoài. Máy chỉ thấy qua gói quảng bá/multicast (SSDP, mDNS, NetBIOS...) bị ẩn,
-  tick "hiện cả máy chỉ thấy qua quảng bá" để xem. Mỗi dòng có kèm số kết nối, số lần tấn công gửi đi / bị tấn công, trạng thái
+  tick "Hiện máy chỉ thấy qua quảng bá" để xem. Mỗi dòng có kèm số kết nối, số lần tấn công gửi đi / bị tấn công, trạng thái
   (bình thường / nghi vấn / đã chặn). Khi máy chạy shield làm gateway (Mobile
   Hotspot), bảng này là toàn bộ các máy trong mạng.
 - **IP đang bị chặn**: thời điểm chặn, cách chặn, thời gian còn lại trước khi tự gỡ.
@@ -82,16 +82,17 @@ Lõi (bắt gói, chặn IP) VẪN chạy trên máy này — chỉ giao diện 
 > (Vercel/VPS...) vì máy chủ đó không thấy card mạng và không điều khiển được
 > firewall của bạn.
 
-## Demo 1 máy: phát lại pcap
-Chọn file ở ô "Demo 1 máy" → **⏯ Phát lại pcap**. File đi qua đúng luồng gom kết
-nối → mô hình → chặn, nhưng chặn ở chế độ **mô phỏng** (không đụng tường lửa, vì
-IP trong pcap là giả). **🧹 Xoá dữ liệu** để làm lại. Nguồn file:
-`traffic_sender/templates/`, `pcaps/` ở gốc dự án, `net_shield/pcaps/`.
+## Thanh điều khiển
+Mọi nút điều khiển nằm trên một hàng: chọn **card mạng** → **Bắt đầu** / **Dừng**,
+**Card mạng** (nạp lại danh sách card), **Xoá dữ liệu** (xoá số liệu, cảnh báo và
+danh sách thiết bị để làm lại từ đầu). Dải nhỏ bên dưới hiện chính sách chặn đang
+áp dụng và cảnh báo nếu chưa chạy bằng Administrator.
 
-Kết quả với mô hình hiện tại: `dos_attack.pcap` 60/60 kết nối là tấn công → chặn
-10.0.0.9; `port_scan.pcap` 51/60 tính là tấn công (4 bỏ qua vì xác suất thấp) →
-chặn; `web_attack.pcap` không phát hiện (đúng giới hạn: mô hình không đọc payload,
-phần này do `web_shield`).
+**Bắt đầu** và **Xoá dữ liệu** bị khoá khi đang giám sát — bấm **Dừng** trước.
+
+Chọn đúng card mạng thật (card có IP dạng `192.168.x.x` của mạng đang dùng, vd
+`Intel(R) Wi-Fi ...`). Không chọn card ảo (VirtualBox, VMware, Wi-Fi Direct,
+Bluetooth) hoặc card có IP `169.254.x.x` / "[không IP]".
 
 ## Demo (2 máy — đúng kịch bản thật)
 | Máy A — NẠN NHÂN (chạy NET SHIELD) | Máy B — KẺ TẤN CÔNG |
